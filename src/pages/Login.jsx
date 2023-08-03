@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // import { useHistory } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Alert, Container, flexbox } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
+
 import {
   FormControl,
   FormLabel,
@@ -23,6 +25,18 @@ function Login() {
   const [show2, setShow2] = useState(false);
 
   const [isLoadinng, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+  // msggg dekhoooo
+
+  useEffect(() => {
+    let loginData = localStorage.getItem("loginData");
+    loginData = JSON.parse(loginData);
+    if (loginData && loginData.isLogged) {
+      navigate("/home");
+    } else {
+    }
+  }, []);
 
   // const history = useHistory();
 
@@ -47,7 +61,19 @@ function Login() {
         login_id: name,
         password: confirmPassword,
       });
-      console.log(res.data);
+      console.log(res);
+      if (res.status === 200) {
+        localStorage.setItem(
+          "loginData",
+          JSON.stringify({ isLogged: true, token: res.data.access_token })
+        );
+        navigate("/home");
+      } else {
+        localStorage.setItem(
+          "loginData",
+          JSON.stringify({ isLogged: false, token: null })
+        );
+      }
 
       if (true) {
         // move to next screen
@@ -65,7 +91,7 @@ function Login() {
     <Container fontSize={20}>
       <VStack spacing="5px " className="loginForm">
         {/* <Alert isVisible={isAlert} /> */}
-        <h1 style={{ paddingBottom: "1em" }}>Login</h1>
+        <h1 style={{ paddingBottom: "0.3em" }}>Login</h1>
         <FormControl id="first-name" isRequired>
           <FormLabel>Login ID</FormLabel>
           <Input
@@ -83,26 +109,12 @@ function Login() {
             <Input
               type={show2 ? "text" : "password"}
               placeholder="Enter Your password"
-              width="250px"
+              width="300px"
               height="30px"
               onChange={(e) => {
                 setConfirmPassword(e.target.value);
               }}
             />
-            <InputRightElement width="4.5norem">
-              <Button
-                colorScheme="twitter"
-                backgroundColor="twitter.100"
-                h="30px "
-                w="3rem"
-                p="auto"
-                size="sm"
-                onClick={handleClick2}
-                variant="outline"
-              >
-                {show2 ? "Hide" : "Show"}
-              </Button>
-            </InputRightElement>
           </InputGroup>
         </FormControl>
         <Button
