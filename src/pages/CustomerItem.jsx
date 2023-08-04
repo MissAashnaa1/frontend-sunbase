@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, WrapItem, Checkbox, Tr, Th, Td } from "@chakra-ui/react";
 import { useSelector, useDispatch } from "react-redux";
-// import {
-//   setDltId,
-//   setIsUpdate,
-//   setShowTastList,
-//   setUpdateID,
-//   setEditTaskObj,
-// } from "../redux/counter";
-
-import toast, { Toaster } from "react-hot-toast";
+import {
+  setDltId,
+  setIsUpdate,
+  setShowCustList,
+  setUpdateID,
+  setEditCustObj,
+} from "../redux/counter";
 
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 
 import axios from "axios";
+import BASE_URL from "../constant";
 
 const CustomerItem = ({ cust }) => {
   // const dispatch = useDispatch();
@@ -24,21 +23,29 @@ const CustomerItem = ({ cust }) => {
   //   setChecked(task.status);
   // }, [task.status]);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (uuid) => {
     // dispatch(setDltId(id));
-    console.log(id, "adsfasdff");
+    console.log(uuid, "delete uuid");
+    let token = localStorage.getItem("loginData");
+    token = JSON.parse(token);
+    token = token.token;
 
-    // try {
-    //   let res = await axios.delete(
-    //     `http://localhost:5000/api/delete-task/${id}`
-    //   );
-    //   console.log(res.data);
-    // } catch (err) {
-    //   console.log(err);
-    // }
+    if (token) {
+      try {
+        let res = await axios.post(`${BASE_URL}/delete-customer`, {
+          uuid,
+          token,
+        });
+        console.log(res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      alert("Something went wrong!");
+    }
   };
 
-  const handleEdit = async (id) => {
+  const handleEdit = async (uuid) => {
     // dispatch(setDltId(id));
     console.log(id, "edit");
 
@@ -147,7 +154,31 @@ const CustomerItem = ({ cust }) => {
       <Td>{cust.state ? cust.state : "-"}</Td>
       <Td>{cust.email ? cust.email : "-"}</Td>
       <Td isNumeric>{cust.phone ? cust.phone : "-"}</Td>
-      <Td>btn1,btn2</Td>
+      <Td>
+        <Box display="flex" alignItems="center" justifyContent="center" gap="4">
+          {" "}
+          <WrapItem>
+            <Button
+              onClick={() => {
+                handleDelete(cust.uuid);
+              }}
+              colorScheme="red"
+            >
+              <DeleteIcon />
+            </Button>
+          </WrapItem>
+          <WrapItem>
+            <Button
+              onClick={() => {
+                handleEdit(cust.uuid);
+              }}
+              colorScheme="blue"
+            >
+              <EditIcon />
+            </Button>
+          </WrapItem>
+        </Box>
+      </Td>
     </Tr>
   );
 };
