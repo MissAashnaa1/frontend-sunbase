@@ -16,6 +16,7 @@ import {
   TableContainer,
 } from "@chakra-ui/react";
 import CustomerItem from "./CustomerItem";
+import BASE_URL from "../constant";
 
 const CustList = () => {
   const { custData } = useSelector((state) => state.counter);
@@ -38,7 +39,7 @@ const CustList = () => {
 
   const getCustomers = async (token) => {
     try {
-      let res = await axios.get(`http://localhost:5000/get-customers/${token}`);
+      let res = await axios.get(`${BASE_URL}/get-customers/${token}`);
       console.log(res.data, "all customers");
       if (res.data.success) {
         if (res.data.list.length === 0) {
