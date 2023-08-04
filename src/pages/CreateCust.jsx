@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-// import { appendTasksData, setIsUpdate } from "../redux/counter";
+import { setIsUpdate } from "../redux/counter";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { SimpleGrid } from "@chakra-ui/react";
+import BASE_URL from "../constant";
 
 const CreateCust = () => {
   const dispatch = useDispatch();
@@ -11,8 +12,8 @@ const CreateCust = () => {
     (state) => state.counter
   );
 
-  const [fName, setfName] = useState(isUpdate ? editCustObj.fname : "");
-  const [lName, setlName] = useState(isUpdate ? editCustObj.lName : "");
+  const [fName, setfName] = useState(isUpdate ? editCustObj.first_name : "");
+  const [lName, setlName] = useState(isUpdate ? editCustObj.last_name : "");
   const [address, setAddress] = useState(isUpdate ? editCustObj.address : "");
   const [city, setCity] = useState(isUpdate ? editCustObj.city : "");
   const [street, setStreet] = useState(isUpdate ? editCustObj.street : "");
@@ -35,18 +36,7 @@ const CreateCust = () => {
     token = token.token;
 
     try {
-      console.log(
-        token,
-        fName,
-        lName,
-        address,
-        city,
-        street,
-        phone,
-        state,
-        email
-      );
-      let res = await axios.post("http://localhost:5000/create-customer/", {
+      let res = await axios.post(`${BASE_URL}/create-customer/`, {
         token,
         fName,
         lName,
@@ -84,35 +74,54 @@ const CreateCust = () => {
   };
 
   const handleUpdateTask = async (event) => {
-    console.log("update clicked");
+    // console.log("update clicked", updateID);
     event.preventDefault();
-    if (title.trim() === "" || description.trim() === "") {
+    if (fName.trim() === "" || lName.trim() === "") {
       toast.error("Fields can not be empty.");
-      setTitle(title.trim());
-      setDescription(description.trim());
+      setTitle(fName.trim());
+      setDescription(lName.trim());
 
       return;
     }
-    try {
-      let res = await axios.put(
-        `http://localhost:5000/api/update-task/${updateID}`,
-        {
-          title,
-          description,
+    let token = localStorage.getItem("loginData");
+    token = JSON.parse(token);
+    token = token.token;
+    if (token && updateID) {
+      try {
+        let res = await axios.post(`${BASE_URL}/update-customer`, {
+          uuid: updateID,
+          token,
+          fName,
+          lName,
+          address,
+          city,
+          street,
+          phone,
+          state,
+          email,
+        });
+        console.log(res.data);
+        if (res.data.success) {
+          toast.success("Task updated.");
+          setfName("");
+          setlName("");
+          setEmail("");
+          setPhone("");
+          setAddress("");
+          setStreet("");
+          setState("");
+          setCity("");
+          dispatch(setIsUpdate(false));
         }
-      );
-      console.log(res.data);
-      if (res.data.success) {
-        toast.success("Task updated.");
+      } catch (error) {
+        console.log(error);
+        toast.error("Something went wrong!.");
       }
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong!.");
+
+      // dispatch(setIsUpdate(null));
+    } else {
+      alert("Something went wrong");
     }
-    setTitle("");
-    setDescription("");
-    dispatch(setIsUpdate(false));
-    dispatch(setIsUpdate(null));
   };
 
   return (
