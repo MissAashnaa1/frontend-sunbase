@@ -3,7 +3,6 @@ import TaskItem from "./CustomerItem";
 import { useSelector, useDispatch } from "react-redux";
 import { setCustData, setIsUpdate } from "../redux/counter";
 import axios from "axios";
-
 import {
   Table,
   Thead,
@@ -17,9 +16,10 @@ import {
 } from "@chakra-ui/react";
 import CustomerItem from "./CustomerItem";
 import BASE_URL from "../constant";
+import { Toaster, toast } from "react-hot-toast";
 
 const CustList = () => {
-  const { custData } = useSelector((state) => state.counter);
+  const { dltID, custData } = useSelector((state) => state.counter);
   // const [tasks, setTasks] = useState(tasksData);
   const [label, setLabel] = useState("Please wait...");
 
@@ -34,7 +34,7 @@ const CustList = () => {
     }
 
     getCustomers(token.token);
-    // dispatch(setIsUpdate(false));
+    dispatch(setIsUpdate(false));
   }, []);
 
   const getCustomers = async (token) => {
@@ -44,6 +44,7 @@ const CustList = () => {
       if (res.data.success) {
         if (res.data.list.length === 0) {
           setLabel("No Customers.");
+          toast.error("No Customers.");
         }
         dispatch(setCustData(res.data.list));
       } else {
@@ -53,32 +54,25 @@ const CustList = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (dltID) {
-  //     handleDelete(dltID);
-  //   }
-  // }, [dltID]);
+  useEffect(() => {
+    if (dltID) {
+      handleDelete(dltID);
+    }
+  }, [dltID]);
 
   const handleDelete = (id) => {
     console.log(id, "handle dlt");
-    const data = tasksData.filter((tasks) => tasks._id !== id);
+    const data = custData.filter((cust) => cust.uuid !== id);
     if (data.length === 0) {
-      setLabel("No tasks.");
+      setLabel("No Customers.");
     }
-    // dispatch(setTasksData(data));
+    dispatch(setCustData(data));
   };
 
   return (
     <div
       style={{ display: "flex", alignItems: "center", flexDirection: "column" }}
     >
-      {/* {tasksData.length > 0 ? (
-        tasksData.map((task) => {
-          return <TaskItem key={task._id} task={task} />;
-        })
-      ) : (
-        <h1>{label}</h1>
-      )} */}
       <h1>Customer List</h1>
       <TableContainer>
         <Table variant="striped" colorScheme="teal">
@@ -95,12 +89,24 @@ const CustList = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {custData.map((cust, i) => {
-              return <CustomerItem key={i} cust={cust} />;
+            {custData.map((cust) => {
+              // console.log(cust, "cust");
+              return <CustomerItem key={cust.uuid} cust={cust} />;
             })}
           </Tbody>
         </Table>
       </TableContainer>
+      <Toaster
+        toastOptions={{
+          // Define default options
+          className: "",
+          duration: 3000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+        }}
+      />
     </div>
   );
 };
